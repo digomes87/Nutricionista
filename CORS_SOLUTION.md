@@ -31,7 +31,7 @@ Modificamos o arquivo `environment.ts` para usar a URL local com proxy:
 ```typescript
 export const environment = {
   production: false,
-  deepseekApiKey: 'sk-65664d8d754f4d549901e24aaa0ebec2',
+  deepseekApiKey: 'sk-kljlkjlj', // here your apikey
   deepseekApiUrl: '/api/chat/completions'  // URL local com proxy
 };
 ```
