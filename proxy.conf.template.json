@@ -1,0 +1,11 @@
+{
+  "/api/chat/completions": {
+    "target": "https://api.deepseek.com",
+    "secure": true,
+    "changeOrigin": true,
+    "logLevel": "debug",
+    "pathRewrite": {
+      "^/api": ""
+    }
+  }
+}

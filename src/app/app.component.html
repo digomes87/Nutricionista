@@ -1,0 +1,170 @@
+<div class="container">
+  <!-- Header -->
+  <div class="header text-center mb-4">
+    <h1 class="display-4 fw-bold text-white">NutriAI</h1>
+    <p class="lead text-white-50">Sistema de Nutrição Saudável com IA</p>
+    <p class="text-white-50">Obtenha um plano alimentar personalizado baseado em suas informações</p>
+  </div>
+
+  <div class="row">
+    <!-- Formulário -->
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h3 class="mb-0">Suas Informações</h3>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="analyzeNutrition()" #nutritionForm="ngForm">
+            <div class="mb-3">
+              <label for="weight" class="form-label fw-semibold">Peso (kg)</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                id="weight" 
+                [(ngModel)]="userData.weight" 
+                name="weight"
+                required 
+                min="30" 
+                max="200">
+            </div>
+            
+            <div class="mb-3">
+              <label for="bodyFat" class="form-label fw-semibold">Gordura Corporal (%)</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                id="bodyFat" 
+                [(ngModel)]="userData.bodyFat" 
+                name="bodyFat"
+                min="5" 
+                max="50">
+              <div class="form-text">Opcional - se não souber, deixe em branco</div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="height" class="form-label fw-semibold">Altura (cm)</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                id="height" 
+                [(ngModel)]="userData.height" 
+                name="height"
+                required 
+                min="100" 
+                max="250">
+            </div>
+            
+            <div class="mb-3">
+              <label for="goal" class="form-label fw-semibold">Objetivo</label>
+              <select 
+                class="form-select" 
+                id="goal" 
+                [(ngModel)]="userData.goal" 
+                name="goal"
+                required>
+                <option value="">Selecione seu objetivo</option>
+                <option value="weight_loss">Perder peso</option>
+                <option value="muscle_gain">Ganhar massa muscular</option>
+                <option value="maintenance">Manter peso</option>
+                <option value="health_improvement">Melhorar saúde</option>
+              </select>
+            </div>
+            
+            <button 
+              type="submit" 
+              class="btn btn-primary w-100" 
+              [disabled]="loading || !nutritionForm.valid">
+              <span *ngIf="!loading">Analisar e Gerar Dieta</span>
+              <span *ngIf="loading">Processando...</span>
+            </button>
+          </form>
+        </div>
+      </div>
+      
+      <!-- JSON Data Card -->
+      <div class="card" *ngIf="result">
+        <div class="card-header">
+          <h3 class="mb-0">Dados Armazenados (JSON)</h3>
+        </div>
+        <div class="card-body">
+          <p>Seus dados e plano alimentar foram armazenados com sucesso!</p>
+          <div class="json-view">
+            <pre>{{ jsonData | json }}</pre>
+          </div>
+          <button class="btn btn-outline-primary mt-3" (click)="downloadJson()">
+            Download JSON
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Resultados -->
+    <div class="col-md-6">
+      <!-- Loading Card -->
+      <div class="card" *ngIf="loading">
+        <div class="card-header">
+          <h3 class="mb-0">Processando</h3>
+        </div>
+        <div class="card-body text-center">
+          <p>Analisando suas informações e gerando planos alimentares personalizados...</p>
+          <div class="loader"></div>
+          <p class="mt-2">Isso pode levar alguns segundos</p>
+        </div>
+      </div>
+      
+      <!-- Results Card -->
+      <div class="card" *ngIf="result && !loading">
+        <div class="card-header">
+          <h3 class="mb-0">Resultado da Análise</h3>
+        </div>
+        <div class="card-body">
+          <div class="result-container">
+            <h4>Análise Inicial</h4>
+            <p><strong>IMC:</strong> {{ result.analysis.imc }} ({{ result.analysis.imcClassification }})</p>
+            <p><strong>Taxa Metabólica Basal (TMB):</strong> {{ result.analysis.tmb }} calorias</p>
+            <p><strong>Gasto Calórico Diário:</strong> {{ result.analysis.dailyCaloricNeeds }} calorias</p>
+          </div>
+          
+          <h4 class="mt-4">Opções de Dieta</h4>
+          <p>Com base nas suas informações, geramos 3 opções de planos alimentares:</p>
+          
+          <div *ngFor="let diet of result.diets" class="diet-option">
+            <h5 class="diet-title">{{ diet.name }}</h5>
+            <p><strong>Café da manhã:</strong> {{ diet.meals.breakfast }}</p>
+            <p><strong>Almoço:</strong> {{ diet.meals.lunch }}</p>
+            <p><strong>Jantar:</strong> {{ diet.meals.dinner }}</p>
+            <p><strong>Lanches:</strong> {{ diet.meals.snacks }}</p>
+          </div>
+          
+          <div class="result-container mt-3">
+            <h4>Recomendações Gerais</h4>
+            <p>{{ result.recommendations }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- How it Works Card -->
+      <div class="card" *ngIf="!result && !loading">
+        <div class="card-header">
+          <h3 class="mb-0">Como Funciona</h3>
+        </div>
+        <div class="card-body">
+          <p>O NutriAI analisa suas informações físicas e objetivos para criar um plano alimentar personalizado.</p>
+          <ol>
+            <li>Preencha seus dados no formulário ao lado</li>
+            <li>Clique em "Analisar e Gerar Dieta"</li>
+            <li>Receba 3 opções de planos alimentares</li>
+            <li>Os resultados serão armazenados em JSON para referência futura</li>
+          </ol>
+          <p>Nosso sistema simula a análise de uma IA avançada para fornecer recomendações nutricionais adequadas ao seu perfil.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <div class="footer text-center mt-5">
+    <p class="text-muted">NutriAI - Sistema de Nutrição Saudável | Simulação de IA com Angular</p>
+    <p class="text-muted">© 2024 - Todos os direitos reservados</p>
+  </div>
+</div>
